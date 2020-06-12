@@ -96,7 +96,7 @@ class TemplateCompiler {
 			} else if ($lexer->peek(self::DELIMITER_START)) {
 				if ($lexer->peek(' $', false))
 					$lexer->skipWhitespace();
-				else if ($lexer->isWhitespace()) {
+				else if ($lexer->isWhitespace() || $lexer->peek(self::DELIMITER_END, false)) {
 					$rawString .= self::DELIMITER_START;
 					continue;
 				}
@@ -117,12 +117,16 @@ class TemplateCompiler {
 						$command .= $char;
 					else
 						throw new TemplateCompileException("Template syntax error, unfinished command: '" . self::DELIMITER_START . $command . "'' around '" . $lexer->getDebugSurroundings(self::DELIMITER_START . $command) . "'.");
+
+					$command .= $this->handleJSTemplateLiterals($lexer);
 				}
 
 				$finishString();
 
 				$this->handleCommand(new TemplateLexer($command), $lexer, $chain);
 			} else {
+				$rawString .= $this->handleJSTemplateLiterals($lexer);
+
 				$char = $lexer->next();
 				if ($char !== false)
 					$rawString .= $char;
@@ -132,6 +136,32 @@ class TemplateCompiler {
 				}
 			}
 		}
+	}
+
+	private function handleJSTemplateLiterals(TemplateLexer $lexer) {
+		$command = '';
+
+		if ($lexer->isAnyOf("$")) {
+
+			$char = $lexer->next();
+			if ($char !== false)
+				$command .= $char;
+			else
+				throw new TemplateCompileException("Template syntax error, unfinished template literal: '" . self::DELIMITER_START . $command . "'' around '" . $lexer->getDebugSurroundings(self::DELIMITER_START . $command) . "'.");
+
+			if ($lexer->peek(self::DELIMITER_START, false)) {
+				while (!$lexer->peek(self::DELIMITER_END)) {
+					$char = $lexer->next();
+					if ($char !== false)
+						$command .= $char;
+					else
+						throw new TemplateCompileException("Template syntax error, unfinished template literal: '" . self::DELIMITER_START . $command . "'' around '" . $lexer->getDebugSurroundings(self::DELIMITER_START . $command) . "'.");
+				}
+				$command .= self::DELIMITER_END;
+			}
+		}
+
+		return $command;
 	}
 
 	public function handleCommand(TemplateLexer $command, TemplateLexer $lexer, Chain $chain, $stackEnd = null) {
