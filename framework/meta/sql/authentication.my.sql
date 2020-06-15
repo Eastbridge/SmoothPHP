@@ -28,7 +28,8 @@ CREATE TABLE `loginsessions` (
     `ip`             VARCHAR(45)         NOT NULL,
     `token`          VARCHAR(255)        NOT NULL,
     `lastUpdate`     INT(11)             NOT NULL,
-    `failedAttempts` INT(11)             NOT NULL
+    `failedAttempts` INT(11)             NOT NULL,
+    `csrf`           VARCHAR(255)        NOT NULL
 )
     ENGINE = MEMORY;
 
@@ -38,7 +39,8 @@ CREATE TABLE `sessions` (
     `lastActive` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     `ip`         VARCHAR(50)                         NOT NULL,
     `selector`   VARCHAR(255)                        NOT NULL,
-    `validator`  VARCHAR(255)                        NOT NULL
+    `validator`  VARCHAR(255)                        NOT NULL,
+    `csrf`       VARCHAR(255)                        NOT NULL
 )
     ENGINE = MEMORY;
 
@@ -47,7 +49,8 @@ CREATE TABLE `longlivedsessions` (
     `userId`          INT(11)             NOT NULL,
     `activeSessionId` INT(11)             NOT NULL,
     `selector`        VARCHAR(255)        NOT NULL,
-    `validator`       VARCHAR(255)        NOT NULL
+    `validator`       VARCHAR(255)        NOT NULL,
+    `csrf`            VARCHAR(255)        NOT NULL
 )
     ENGINE = InnoDB;
 

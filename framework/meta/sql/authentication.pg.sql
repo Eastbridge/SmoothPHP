@@ -26,7 +26,8 @@ CREATE TABLE loginsessions (
     "ip"             VARCHAR(45)  NOT NULL,
     "token"          VARCHAR(255) NOT NULL,
     "lastUpdate"     INT          NOT NULL,
-    "failedAttempts" INT          NOT NULL
+    "failedAttempts" INT          NOT NULL,
+    "csrf"           VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE sessions (
@@ -35,7 +36,8 @@ CREATE TABLE sessions (
     "lastActive" TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "ip"         VARCHAR(50)  NOT NULL,
     "selector"   VARCHAR(255) NOT NULL,
-    "validator"  VARCHAR(255) NOT NULL
+    "validator"  VARCHAR(255) NOT NULL,
+    "csrf"       VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE longlivedsessions (
@@ -43,7 +45,8 @@ CREATE TABLE longlivedsessions (
     "userId"          INT          NOT NULL,
     "activeSessionId" INT          NOT NULL,
     "selector"        VARCHAR(255) NOT NULL,
-    "validator"       VARCHAR(255) NOT NULL
+    "validator"       VARCHAR(255) NOT NULL,
+    "csrf"            VARCHAR(255) NOT NULL
 );
 
 ALTER TABLE permissions
