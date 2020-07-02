@@ -24,11 +24,13 @@ class LongLivedSession extends MappedDBObject {
 	private $activeSessionId;
 	private $selector;
 	private $validator;
+	private $csrf;
 
 	public function __construct(User $user, ActiveSession $session) {
 		$this->userId = $user->getId();
 		$this->activeSessionId = $session->getId();
 		$this->regenerateSecrets();
+		$this->csrf = base64_encode(random_bytes(128));
 	}
 
 	public function getTableName() {
@@ -86,4 +88,7 @@ class LongLivedSession extends MappedDBObject {
 		return null;
 	}
 
+	public function getCSRF() {
+		return $this->csrf;
+	}
 }

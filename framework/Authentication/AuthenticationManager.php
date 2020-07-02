@@ -274,6 +274,10 @@ class AuthenticationManager {
 		return in_array($permission, $this->getPermissions($user));
 	}
 
+	public function getSessionCSRF() {
+		return $this->session ? $this->session->getCSRF() : '';
+	}
+
 	public function canGo() {
 		$args = func_get_args();
 
@@ -306,10 +310,24 @@ class AuthenticationManager {
 				$missing = array_diff($required, $user->isLoggedIn() ? $this->permissions[$user->getId()] : []);
 				if (count($missing) > 0)
 					return $request ? $this->determineNoAccessAction($request, $user->isLoggedIn()) : false;
+
+				global $kernel;
+				if (isset($kernel->getConfig()->csrf) && $kernel->getConfig()->csrf && $user->isLoggedIn() && $request)
+					return $this->checkCSRFNoAccess($request, $routeOpts['path']);
 			}
 		}
 
 		return true; // Proceed as normal
+	}
+
+	private function checkCSRFNoAccess(Request $request, $path) {
+		global $kernel;
+		if (!$request || !(
+				($request->get && $request->get->csrf == $this->getSessionCSRF()) ||
+				($request->post && $request->post->csrf == $this->getSessionCSRF())
+			)) return $kernel->error(sprintf('%s<br \>%s', $kernel->getLanguageRepository()->smooth_error_access, __ENV__ == 'dev' ? $path : ''));
+
+		return true;
 	}
 
 	private function determineNoAccessAction(Request $request, $isLoggedIn) {

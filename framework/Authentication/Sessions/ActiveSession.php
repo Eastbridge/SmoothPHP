@@ -24,6 +24,7 @@ class ActiveSession extends MappedDBObject {
 	private $ip;
 	private $selector;
 	private $validator;
+	private $csrf;
 
 	public function __construct(User $user) {
 		global $request;
@@ -33,6 +34,7 @@ class ActiveSession extends MappedDBObject {
 		$this->selector = bin2hex(random_bytes(16));
 		$validator = random_bytes(72);
 		$this->validator = password_hash($validator, PASSWORD_DEFAULT);
+		$this->csrf = base64_encode(random_bytes(128));
 
 		setcookie(self::SESSION_KEY, sprintf('%s:%s', $this->selector, base64_encode($validator)),
 			0, // This cookie expires at the end of the session
@@ -76,4 +78,7 @@ class ActiveSession extends MappedDBObject {
 		return null;
 	}
 
+	public function getCSRF() {
+		return $this->csrf;
+	}
 }

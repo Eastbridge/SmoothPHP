@@ -21,12 +21,14 @@ class LoginSession extends MappedDBObject {
 	private $token;
 	private $lastUpdate;
 	private $failedAttempts;
+	private $csrf;
 
 	public function __construct(Request $request) {
 		$this->ip = $request->getIP();
 		$this->token = base64_encode(random_bytes(128));
 		$this->lastUpdate = time();
 		$this->failedAttempts = 0;
+		$this->csrf = base64_encode(random_bytes(128));
 	}
 
 	public function getTableName() {
@@ -48,6 +50,10 @@ class LoginSession extends MappedDBObject {
 	public function increaseFailure() {
 		$this->lastUpdate = time();
 		$this->failedAttempts++;
+	}
+
+	public function getCSRF() {
+		return $this->csrf;
 	}
 
 }
