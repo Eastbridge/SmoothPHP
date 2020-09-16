@@ -20,9 +20,10 @@ use SmoothPHP\Framework\Flow\Requests\Files\FileSource;
  * @property VariableSource post
  * @property VariableSource server
  * @property FileSource files
+ * @property FileSource put
  */
 class Request {
-	private $getr, $postr, $serverr, $filesr;
+	private $getr, $postr, $serverr, $filesr, $putr;
 	public $meta;
 
 	/**
@@ -38,6 +39,7 @@ class Request {
 		$this->serverr = new VariableSource($server);
 		$this->filesr = new FileSource($files);
 		$this->meta = new \stdClass();
+		$this->putr = new VariableSource($post);
 	}
 
 	/**
@@ -48,6 +50,7 @@ class Request {
 	public function __get($scope) {
 		switch ($scope) {
 			case "get":
+			case "put":
 			case "post":
 			case "server":
 			case "files":
