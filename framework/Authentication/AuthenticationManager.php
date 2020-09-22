@@ -278,6 +278,11 @@ class AuthenticationManager {
 		return $this->session ? $this->session->getCSRF() : '';
 	}
 
+	public function getConfig() {
+		global $kernel;
+		return $kernel->getConfig();
+	}
+
 	public function canGo() {
 		$args = func_get_args();
 
