@@ -278,6 +278,10 @@ class AuthenticationManager {
 		return $this->session ? $this->session->getCSRF() : '';
 	}
 
+	public function getTime() {
+		return time();
+	}
+
 	public function getConfig() {
 		global $kernel;
 		return $kernel->getConfig();
