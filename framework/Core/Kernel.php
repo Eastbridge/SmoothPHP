@@ -20,6 +20,7 @@ use SmoothPHP\Framework\Database\Database;
 use SmoothPHP\Framework\Flow\Requests\Request;
 use SmoothPHP\Framework\Flow\Requests\Robots;
 use SmoothPHP\Framework\Flow\Responses\AlternateErrorResponse;
+use SmoothPHP\Framework\Flow\Responses\NoContentResponse;
 use SmoothPHP\Framework\Flow\Responses\PlainTextResponse;
 use SmoothPHP\Framework\Flow\Routing\RouteDatabase;
 use SmoothPHP\Framework\Localization\FileDataSource;
@@ -179,6 +180,11 @@ class Kernel {
 	public function getResponse(Request $request) {
 		$resolvedRoute = $this->routeDatabase->resolve($request);
 		if (!$resolvedRoute) {
+			if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+				header('Access-Control-Allow-Origin: *');
+				header('Access-Control-Allow-Headers: Authorization, Content-Type');
+				return new NoContentResponse();
+			}
 			http_response_code(404);
 			$response = $this->error($this->languagerepo->getEntry('smooth_error_404'));
 			$response->build($this, $request);

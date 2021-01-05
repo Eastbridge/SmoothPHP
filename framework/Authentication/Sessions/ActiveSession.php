@@ -33,7 +33,11 @@ class ActiveSession extends MappedDBObject {
 
 		$this->selector = bin2hex(random_bytes(16));
 		$validator = random_bytes(72);
-		$this->validator = password_hash($validator, PASSWORD_DEFAULT);
+		// We base64 encode the validator before hashing, as otherwise dashboard server
+		// cannot handle all sessions (~40% of the sessions would fail).
+		// This seems to be due to different handling of a null byte.
+		// By first base64 encoding we get rid of this pesky null byte.
+		$this->validator = password_hash(base64_encode($validator), PASSWORD_DEFAULT);
 		$this->csrf = base64_encode(random_bytes(128));
 
 		setcookie(self::SESSION_KEY, sprintf('%s:%s', $this->selector, base64_encode($validator)),
@@ -53,23 +57,37 @@ class ActiveSession extends MappedDBObject {
 	}
 
 	public static function readCookie(DBObjectMapper $map) {
-		if (isset($_COOKIE[self::SESSION_KEY])) {
-			$cookie = explode(':', $_COOKIE[self::SESSION_KEY]);
+		$headers = getallheaders();
+		$cookieSet = isset($_COOKIE[self::SESSION_KEY]);
+		if ($cookieSet || isset($headers['Authorization'])) {
+			$value = null;
+			if($cookieSet) {
+				$value = explode(':', $_COOKIE[self::SESSION_KEY]);
+			}else{
+				$authorization = $headers['Authorization'];
+				if(strpos($authorization, 'Bearer ') !== 0) {
+					return null;
+				}
 
-			if (count($cookie) != 2)
+				$value = explode(':',substr($authorization, 7));
+			}
+
+			if (count($value) != 2) {
 				return null;
+			}
 
 			global $request;
 			/* @var $session ActiveSession */
 			$session = $map->fetch([
-				'ip'       => $request->getIP(),
-				'selector' => $cookie[0]
+				// TODO fix
+				//'ip'       => $request->getIP(),
+				'selector' => $value[0]
 			]);
 
 			if (!$session)
 				return null;
 
-			if (!password_verify(base64_decode($cookie[1]), $session->validator))
+			if (!password_verify($value[1], $session->validator))
 				return null;
 
 			return $session;
