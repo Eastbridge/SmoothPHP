@@ -51,6 +51,7 @@ class AuthenticationManager {
 
 	// Customisation
 	private $authSchemes = [];
+	private $customSettings = [];
 
 	public function initialize(Kernel $kernel) {
 		$db = $kernel->getDatabase();
@@ -222,6 +223,10 @@ class AuthenticationManager {
 		}
 	}
 
+	public function setActiveUser($user) {
+		$this->user = $user;
+	}
+
 	/**
 	 * @return User|AbstractUser
 	 */
@@ -276,6 +281,17 @@ class AuthenticationManager {
 
 	public function getSessionCSRF() {
 		return $this->session ? $this->session->getCSRF() : '';
+	}
+
+	public function setCustomSettings($key, $value) {
+		array_push($this->customSettings, [
+			'action' => $key,
+			'args'   => $value
+		]);
+	}
+
+	public function getCustomSettings() {
+		return json_encode($this->customSettings);
 	}
 
 	public function getTime() {
