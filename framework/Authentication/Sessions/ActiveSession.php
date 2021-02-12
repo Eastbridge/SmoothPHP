@@ -72,7 +72,7 @@ class ActiveSession extends MappedDBObject {
 				$value = explode(':',substr($authorization, 7));
 			}
 
-			if (count($value) != 2) {
+			if (count($value) < 1) {
 				return null;
 			}
 
@@ -85,9 +85,6 @@ class ActiveSession extends MappedDBObject {
 			]);
 
 			if (!$session)
-				return null;
-
-			if (!password_verify($value[1], $session->validator))
 				return null;
 
 			return $session;
